@@ -1,0 +1,48 @@
+version: "3.8"
+services:
+  go-queue:
+    build:
+      context: .
+      dockerfile: ./docker/go/Dockerfile
+    volumes:
+      - ./src:/var/www/src
+    ports:
+      - 8080:8080
+    tty: true
+    depends_on:
+      - db
+    environment:
+      - TZ=Asia/Tokyo
+
+  db:
+    platform: linux/x86_64
+    build:
+      context: .
+      dockerfile: ./docker/mysql/Dockerfile
+    ports:
+      - 13306:3306
+    volumes:
+      - db-store:/var/lib/mysql
+      - ./docker/mysql/logs:/var/log/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    environment:
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASS}
+      - MYSQL_ROOT_PASSWORD=${DB_PASS}
+
+  phpmyadmin:
+    platform: linux/x86_64
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8888:80
+    links:
+      - db
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=db
+      - PMA_USER=${PMA_USER}
+      - PMA_PASSWORD=${PMA_PASSWORD}
+
+volumes:
+  db-store:
