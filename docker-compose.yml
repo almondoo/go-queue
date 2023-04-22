@@ -8,11 +8,23 @@ services:
       - ./src:/var/www/src
     ports:
       - 8080:8080
+      - 8081:8081 # godoc
     tty: true
     depends_on:
       - db
+      - redis
     environment:
       - TZ=Asia/Tokyo
+
+  redis:
+    build:
+      context: .
+      dockerfile: ./docker/redis/Dockerfile
+    ports:
+      - 6379:6379
+    volumes:
+      - ./docker/redis/data:/data
+      - ./docker/redis/redis.conf:/etc/redis.conf
 
   db:
     platform: linux/x86_64
